@@ -26,7 +26,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       iron-list {
-        padding-top: 64px;
         --iron-list-items-container: {
           max-width: 800px;
           margin: auto;
@@ -106,19 +105,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-size: 18px;
       }
 
+      .loadingIndicator {
+        text-align: center;
+        position: absolute;
+        top: 45%;
+        left: 45%;
+      }
+
+      .spinner {
+        width: 40px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
       .spacer {
         @apply(--layout-flex);
       }
     </style>
-    <iron-ajax url="data/teams.json" last-response="{{items}}" auto></iron-ajax>
+<!--    <iron-ajax url="data/teams.json" last-response="{{items}}" auto></iron-ajax> -->
 
-    <iron-list id="list" items="[[sortItems(items)]]" as="item" selection-enabled multi-selection>
+    <iron-ajax
+        auto
+        id="ajax"
+        contentType="application/json",
+        url="https://powerful-plateau-26248.herokuapp.com/?"
+        params='{"query":"query {teams(start:0, count: 100) {displayName, rating, previousRating, players {displayName, rating, previousRating}}}"}'
+        loading="{{isLoadingItems}}"
+        handle-as="json"
+        on-response="_onItemsLoaded"
+        last-response="{{response}}">
+    </iron-ajax>
+
+    <h1 hidden$="[[isLoadingItems]]">Top 10 Teams</h1>
+    <iron-list id="list" items="[[items]]" as="item" selection-enabled multi-selection>
       <template>
         <div>
           <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
             <!--<iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>-->
             <div class="team">
-              <div class="team-name">[[item.displayName]]</div>
+              <div class="team-name">[[getIndex(index)]]. [[item.displayName]]</div>
               <div class="team-rating">[[item.rating]]</div>
             </div>
             <div class="players">
@@ -131,6 +158,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </iron-list>
 
+    <div class="loadingIndicator" hidden$="[[!isLoadingItems]]">
+      <img class="spinner" src="../images/spinner.gif">
+      <p>Fetching team data...</p>
+    </div>
+
   </template>
 
   <script>
@@ -142,8 +174,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       items: {
         type: Array
-      }
+      },
 
+      response: {},
+
+      loadingIndicator: Boolean
+
+    },
+
+    getIndex: function(index) {
+      return index + 1;
+    },
+
+    _onItemsLoaded: function(e) {
+      this.items = this.sortItems(this.response.data.teams);
     },
 
     sortItems: function(items) {
@@ -155,10 +199,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     getPlayerProperty: function(item, index, field) {
       return item.players[index][field];
-    },
-
-    _computeSortOrder: function(bool) {
-      return bool ? 1 : -1;
     },
 
     attached: function() {
