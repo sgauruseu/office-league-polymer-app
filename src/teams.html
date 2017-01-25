@@ -37,7 +37,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .item {
-        @apply(--layout-horizontal);
+        @apply(--layout-vertical);
         padding: 20px;
         background-color: white;
         border: 1px solid #ddd;
@@ -53,10 +53,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #DDD;
       }
 
-      .pad {
+      .team {
         padding: 0 16px;
         @apply(--layout-flex);
         @apply(--layout-horizontal);
+        -webkit-flex-basis: 0%;
+        flex-basis: 0%;
       }
 
       .team-name {
@@ -79,21 +81,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      .item:hover .shortText::after {
-        content: ' [+]';
-        color: gray;
+      .item .players {
+        display: none;
+        @apply(--layout-flex);
+        -webkit-flex-basis: 0%;
+        flex-basis: 0%;
+        margin: 0 auto;
       }
 
-      .item.expanded:hover .shortText::after {
-        content: '';
+      .item.expanded .players {
+        display: flex;
+        padding-top: 20px;
       }
 
-      .item.expanded .longText {
-        display: block;
+      .player {
+        font-weight: bold;
+        font-size: 24px;
+        padding: 0 20px;
+        text-align: center;
       }
 
-      .item.expanded:hover .longText::after {
-        content: ' [–]';
+      .player el {
+        font-weight: normal;
+        font-size: 18px;
       }
 
       .spacer {
@@ -107,11 +117,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div>
           <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
             <!--<iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>-->
-            <div class="pad">
+            <div class="team">
               <div class="team-name">[[item.displayName]]</div>
               <div class="team-rating">[[item.rating]]</div>
-<!--              <div class="shortText">[[item.shortText]]</div>
-              <div class="longText">[[item.longText]]</div>-->
+            </div>
+            <div class="players">
+              <div class="player">[[getPlayerProperty(item, 0, 'displayName')]]<br><el>[[getPlayerProperty(item, 0, 'rating')]]</el></div>
+              <div style="padding-top: 5px;">+</div>
+              <div class="player">[[getPlayerProperty(item, 1, 'displayName')]]<br><el>[[getPlayerProperty(item, 1, 'rating')]]</el></div>
             </div>
           </div>
         </div>
@@ -138,6 +151,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return b.rating - a.rating;
       });
 
+    },
+
+    getPlayerProperty: function(item, index, field) {
+      return item.players[index][field];
     },
 
     _computeSortOrder: function(bool) {
