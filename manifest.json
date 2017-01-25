@@ -1,0 +1,7 @@
+{
+  "name": "office-league-app",
+  "short_name": "office-league-app",
+  "description": "Office league application that manages sport activities",
+  "start_url": "/",
+  "display": "standalone"
+}
