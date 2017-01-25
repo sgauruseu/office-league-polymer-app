@@ -11,6 +11,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
 
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+
 <dom-module id="teams-page">
   <template>
     <style include="shared-styles">
@@ -19,19 +24,140 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         padding: 10px;
       }
-    </style>
 
-    <div class="card">
-      <div class="circle">2</div>
-      <h1>Teams</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
-    </div>
+      iron-list {
+        padding-top: 64px;
+        --iron-list-items-container: {
+          max-width: 800px;
+          margin: auto;
+          margin-top: 60px;
+          margin-bottom: 60px;
+          border-bottom: 1px solid #ddd;
+        };
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+
+      .avatar {
+        height: 40px;
+        width: 40px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply(--layout-flex);
+        @apply(--layout-horizontal);
+      }
+
+      .team-name {
+        font-size: 16px;
+        font-weight: bold;
+        @apply(--layout-flex-11);
+
+      }
+
+      .team-rating {
+        @apply(--layout-flex-1);
+      }
+
+      .shortText, .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        display: none;
+      }
+
+      .item:hover .shortText::after {
+        content: ' [+]';
+        color: gray;
+      }
+
+      .item.expanded:hover .shortText::after {
+        content: '';
+      }
+
+      .item.expanded .longText {
+        display: block;
+      }
+
+      .item.expanded:hover .longText::after {
+        content: ' [–]';
+      }
+
+      .spacer {
+        @apply(--layout-flex);
+      }
+    </style>
+    <iron-ajax url="data/teams.json" last-response="{{items}}" auto></iron-ajax>
+
+    <iron-list id="list" items="[[sortItems(items)]]" as="item" selection-enabled multi-selection>
+      <template>
+        <div>
+          <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+            <!--<iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>-->
+            <div class="pad">
+              <div class="team-name">[[item.displayName]]</div>
+              <div class="team-rating">[[item.rating]]</div>
+<!--              <div class="shortText">[[item.shortText]]</div>
+              <div class="longText">[[item.longText]]</div>-->
+            </div>
+          </div>
+        </div>
+      </template>
+    </iron-list>
+
   </template>
 
   <script>
-    Polymer({
-      is: 'teams-page',
-    });
+    (function() {
+  Polymer({
+    is: 'teams-page',
+
+    properties: {
+
+      items: {
+        type: Array
+      }
+
+    },
+
+    sortItems: function(items) {
+      return items.sort(function (a, b) {
+        return b.rating - a.rating;
+      });
+
+    },
+
+    _computeSortOrder: function(bool) {
+      return bool ? 1 : -1;
+    },
+
+    attached: function() {
+      // Use the document element
+      this.$.list.scrollTarget = this.ownerDocument.documentElement;
+    },
+
+    iconForItem: function(item) {
+      return item ? (item.integer < 50 ? 'star-border' : 'star') : '';
+    },
+
+    getClassForItem: function(item, selected) {
+      return selected ? 'item expanded' : 'item';
+    }
+
+  });
+    })();
   </script>
 </dom-module>
